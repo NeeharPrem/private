@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo,useCallback} from 'react';
-import { getAllTicketsFromDB, updateSelectedTicketsStatus } from '../components/helpers/indexdb';
+import { getAllTicketsFromDB, updateSelectedTicketsStatus,getAllTickets} from '../components/helpers/indexdb';
 import { getLastBillNumber, saveBillNumber } from './helpers/billnodb'
 import { saveBills } from './helpers/billsdb'
 import SlipModal from './SlipModal';
@@ -18,12 +18,11 @@ const BillingModal = ({ isOpen, onClose }) => {
     const [displayedTickets, setDisplayedTickets] = useState([]);
     const [selectedTickets, setSelectedTickets] = useState(new Set());
     const [buyerName, setBuyerName] = useState('');
-    const [ticketsToShow, setTicketsToShow] = useState(50);
     const [selectedDrawDate, setSelectedDrawDate] = useState('');
     const [expandedGroups, setExpandedGroups] = useState(new Set());
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
-    const [ticketprice] = useState([33.36, 42.50, 33.10, 42.10])
+    // const [ticketprice] = useState([33.36, 42.50, 33.10, 42.10])
+    const [ticketprice] = useState([42.70])
     const [selectedPrice, setSelectedPrice] = useState(Number(ticketprice[0]));
     const [newprice, setNewprice] = useState(false)
     const [pwtPrice, setpwtPrice] = useState(0)
@@ -36,7 +35,8 @@ const BillingModal = ({ isOpen, onClose }) => {
     const [newSelected,setNewSelected]=useState(new Set())
     const [newSelected1, setNewSelected1] = useState(new Set())
     const [showTicket, setShowTickets] = useState(new Date())
-    const [isLoading, setIsLoading] = useState(false);
+    const currentDateTime= new Date();
+    const ticketsToShow= 50;
 
     useEffect(()=>{
         setSelectedDrawDate(formatDate(showTicket))
@@ -86,13 +86,13 @@ const BillingModal = ({ isOpen, onClose }) => {
         setEnd('');
     }
 
-    function filterTicketsByRange(tickets, startSuffix, endSuffix) {
-        if (startSuffix !== null && endSuffix !== null) {
+    function filterTicketsByRange(tickets, start, end) {
+        if (start !== null && end !== null && (start.length && end.length)==2) {
             const filteredTickets = [];
 
             for (const ticket of tickets) {
                 const idSuffix = parseInt(ticket.id.slice(-2), 10);
-                if (idSuffix >= startSuffix && idSuffix <= endSuffix) {
+                if (idSuffix >= start && idSuffix <= end) {
                     filteredTickets.push(ticket);
                 }
             }
@@ -243,7 +243,7 @@ const BillingModal = ({ isOpen, onClose }) => {
             async function fetchTickets(showTicket) {
                 const ticketsFromDB = await getAllTicketsFromDB(showTicket);
                 const unsoldTickets = ticketsFromDB.filter(ticket => ticket.state === true);
-                if (unsoldTickets[0].ticketname === 'FIFTY-FIFTY'){
+                if (unsoldTickets[0]?.ticketName === 'FIFTY-FIFTY'){
                     setSelectedPrice(Number(ticketprice[1]))
                 }else{
                     setSelectedPrice(Number(ticketprice[0]))

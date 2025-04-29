@@ -181,6 +181,8 @@ const styles = {
 
 const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt, billno, total, setTotal }, ref) => {
     const contentRef = useRef();
+    console.log(ticketSummary)
+    const safeSummary = Array.isArray(ticketSummary) ? ticketSummary : [ticketSummary];
 
     useImperativeHandle(ref, () => ({
         print: () => contentRef.current,
@@ -200,15 +202,16 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
     useEffect(() => {
         const calculateTotal = (items) => {
             return items.reduce((acc, item) => {
-                return acc + item.groups.reduce((groupAcc, group) => {
-                    return groupAcc + group.ranges.reduce((rangeAcc, range) => {
-                        return rangeAcc + range.count * range.price;
+                const groupTotal = (item.groups || []).reduce((groupAcc, group) => {
+                    return groupAcc + (group.ranges || group.details || []).reduce((rangeAcc, range) => {
+                        return rangeAcc + (range.count || 0) * (range.price || 0);
                     }, 0);
                 }, 0);
+                return acc + groupTotal;
             }, 0);
         };
 
-        const newTotal = calculateTotal(ticketSummary);
+        const newTotal = calculateTotal(safeSummary);
         setTotal(newTotal);
     }, [ticketSummary, setTotal]);
 
@@ -217,14 +220,14 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
     };
 
     const calculateTotalQuantity = (items) => {
-        const totalQuantity = items.reduce((acc, item) => {
-            return acc + item.groups.reduce((groupAcc, group) => {
-                return groupAcc + group.ranges.reduce((rangeAcc, range) => {
-                    return rangeAcc + range.count;
+        return items.reduce((acc, item) => {
+            const groupQuantity = (item.groups || []).reduce((groupAcc, group) => {
+                return groupAcc + (group.ranges || group.details || []).reduce((rangeAcc, range) => {
+                    return rangeAcc + (range.totalCount || 0);
                 }, 0);
             }, 0);
+            return acc + groupQuantity;
         }, 0);
-        return totalQuantity;
     };
 
     function formatDate(date) {
@@ -260,31 +263,43 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
                     </tr>
                 </thead>
                 <tbody>
-                    {ticketSummary.map((item, index) => (
+                    {safeSummary.map((item, index) => (
                         <React.Fragment key={index}>
                             <tr>
                                 <td style={{ ...styles.tableCell, ...styles.colNo }}>{index + 1}.</td>
-                                <td style={{ ...styles.tableDraw, ...styles.colDraw }}>{item.ticketname} {item.serialNum}-{item.drawDate}</td>
+                                <td style={{ ...styles.tableDraw, ...styles.colDraw }}>
+                                    {item.ticketname} {item.serialNum}-{item.drawDate}
+                                </td>
                                 <td style={{ ...styles.tableCell, ...styles.colQty }}></td>
                                 <td style={{ ...styles.tableCell, ...styles.colRate }}></td>
                                 <td style={{ ...styles.tableCell, ...styles.colValue }}></td>
                             </tr>
-                            {item.groups.map((group, groupIndex) => (
+                            {(item.groups || []).map((group, groupIndex) => (
                                 <React.Fragment key={groupIndex}>
                                     <tr>
                                         <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
-                                        <td style={{ ...styles.tablegrpCell, ...styles.colDraw }}>({group.series})</td>
+                                        <td style={{ ...styles.tablegrpCell, ...styles.colDraw }}>
+                                            ({group.details[0].series || item.series})
+                                        </td>
                                         <td style={{ ...styles.tableCell, ...styles.colQty }}></td>
                                         <td style={{ ...styles.tableCell, ...styles.colRate }}></td>
                                         <td style={{ ...styles.tableCell, ...styles.colValue }}></td>
                                     </tr>
-                                    {group.ranges.map((range, rangeIndex) => (
+                                    {(group.ranges || group.details || []).map((range, rangeIndex) => (
                                         <tr key={rangeIndex}>
                                             <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
-                                            <td style={{ ...styles.tabletkCell, ...styles.colDraw }}>{`${range.startNumber}-${range.endNumber}`}</td>
-                                            <td style={{ ...styles.tableqtyCell, ...styles.colQty }}>{range.count.toString().padStart(3, ' ')}</td>
-                                            <td style={{ ...styles.tableCell, ...styles.colRate }}>{range.price.toFixed(2)}</td>
-                                            <td style={{ ...styles.tableCell, ...styles.colValue }}>{(range.count * range.price).toFixed(2)}</td>
+                                            <td style={{ ...styles.tabletkCell, ...styles.colDraw }}>
+                                                {`${range.startNumber}-${range.endNumber}`}
+                                            </td>
+                                            <td style={{ ...styles.tableqtyCell, ...styles.colQty }}>
+                                                {(range.count || 0).toString().padStart(3, ' ')}
+                                            </td>
+                                            <td style={{ ...styles.tableCell, ...styles.colRate }}>
+                                                {(group.price || 0).toFixed(2)}
+                                            </td>
+                                            <td style={{ ...styles.tableCell, ...styles.colValue }}>
+                                                {((range.count || 0) * (group.price || 0)).toFixed(2)}
+                                            </td>
                                         </tr>
                                     ))}
                                 </React.Fragment>
@@ -297,7 +312,7 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
                     <tr>
                         <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
                         <td style={{ ...styles.tabletotalCell, ...styles.colTotal }}>Total</td>
-                        <td style={{ ...styles.tableCell, ...styles.colQty }}>{calculateTotalQuantity(ticketSummary)}</td>
+                        <td style={{ ...styles.tableCell, ...styles.colQty }}>{calculateTotalQuantity(safeSummary)}</td>
                         <td style={{ ...styles.tableCell, ...styles.colRate }}></td>
                         <td style={{ ...styles.tabletotalCell, ...styles.colValue }}>₹{total.toFixed(2)}</td>
                     </tr>
@@ -309,7 +324,7 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
             <div className='flex flex-row justify-between'>
                 <div>
                     <p className='text-black text-[13px]'>PWT : ₹ <span className='text-black text-sm font-semibold'>{pwt}</span></p>
-                    <p className='text-black text-[13px]'>Total Payable Amount : ₹ <span className='text-black text-sm font-semibold'>{calculatePayable(ticketSummary[0]).toFixed(2)}</span></p>
+                    <p className='text-black text-[13px]'>Total Payable Amount : ₹ <span className='text-black text-sm font-semibold'>{calculatePayable(safeSummary[0]).toFixed(2)}</span></p>
                     <p className='text-black text-[13px] mt-1'>DC shall be claimed within 30 days</p>
                 </div>
                 <div className='mt-5'>
@@ -374,7 +389,7 @@ const SlipModal = ({ isOpen, onRequestClose, ticketSummary, currentDateTime, nam
         return () => removeListener();
     }, []);
 
-    if (!ticketSummary || ticketSummary.length === 0) {
+    if (!ticketSummary || (Array.isArray(ticketSummary) && ticketSummary.length === 0)) {
         return (
             <Modal isOpen={isOpen} onRequestClose={onRequestClose} style={modalStyles}>
                 <div style={styles.page}>

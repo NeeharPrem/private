@@ -56,14 +56,24 @@ const LotteryTicketGenerator = () => {
     const dropdownRefs = useRef({});
     const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
     const [drawDate, setDrawDate] = useState(new Date());
+    // const [tickets,] = useState([
+    //     { name: 'WIN-WIN',serial:'W-'},
+    //     { name: 'AKSHAYA',serial:'AK-'},
+    //     { name: 'KARUNYA',serial:'KR-'},
+    //     { name: 'NIRMAL',serial:'NR-'},
+    //     { name: 'KARUNYA PLUS',serial:'KN-'},
+    //     { name: 'FIFTY-FIFTY',serial:'FF-'},
+    //     { name: 'STHREE-SAKTHI',serial:'SS-'}
+    // ]);
     const [tickets,] = useState([
-        { name: 'WIN-WIN',serial:'W-'},
-        { name: 'AKSHAYA',serial:'AK-'},
-        { name: 'KARUNYA',serial:'KR-'},
-        { name: 'NIRMAL',serial:'NR-'},
-        { name: 'KARUNYA PLUS',serial:'KN-'},
-        { name: 'FIFTY-FIFTY',serial:'FF-'},
-        { name: 'STHREE-SAKTHI',serial:'SS-'}
+        { name: 'DHANALEKSHMI', serial: 'DL-' },
+        { name: 'SUVARNA KERALAM', serial: 'SK-' },
+        { name: 'BHAGYATHARA', serial: 'BT-' },
+        { name: 'SAMRUDHI', serial: 'SM-' },
+        { name: 'STHREE-SAKTHI', serial: 'SS-' },
+        { name: 'KARUNYA', serial: 'KR-' },
+        { name: 'KARUNYA PLUS', serial: 'KN-' },
+        // { name: 'FIFTY-FIFTY', serial: 'FF-' },
     ]);
     const[showTicket,setShowTickets]=useState(new Date())
     const [totalTickets,setTotalTickets]=useState(0)

@@ -314,17 +314,17 @@ function createWindow() {
             await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlTemplate)}`);
 
 
-            // const formatDate = (date) => {
-            //     return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-            // }
-            // const formated = formatDate(new Date())
+            const formatDate = (date) => {
+                return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+            }
+            const formated = formatDate(new Date())
             const documentsPath = app.getPath('documents');
-            // const newPath = path.join(documentsPath, formated.replace(/\//g, path.sep));
-            // try {
-            //     await fs.access(newPath);
-            // } catch {
-            //     await fs.mkdir(newPath, { recursive: true });
-            // }
+            const newPath = path.join(documentsPath, formated.replace(/\//g, path.sep));
+            try {
+                await fs.access(newPath);
+            } catch {
+                await fs.mkdir(newPath, { recursive: true });
+            }
 
             const pdfPath = path.join(documentsPath, options.fileName || 'print.pdf');
             log.info(`Printing to PDF: ${pdfPath}`);
