@@ -181,7 +181,6 @@ const styles = {
 
 const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt, billno, total, setTotal }, ref) => {
     const contentRef = useRef();
-    console.log(ticketSummary)
     const safeSummary = Array.isArray(ticketSummary) ? ticketSummary : [ticketSummary];
 
     useImperativeHandle(ref, () => ({
@@ -194,18 +193,21 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
         const period = hours >= 12 ? 'pm' : 'am';
         hours = hours % 12 || 12;
         minutes = minutes < 10 ? `0${minutes}` : minutes;
-        const out = `${hours}.${minutes} ${period}`;
-        return out;
+        return `${hours}.${minutes} ${period}`;
     }
-    let out = formattedDate(currentDateTime)
+
+    const out = formattedDate(currentDateTime);
 
     useEffect(() => {
         const calculateTotal = (items) => {
             return items.reduce((acc, item) => {
                 const groupTotal = (item.groups || []).reduce((groupAcc, group) => {
-                    return groupAcc + (group.ranges || group.details || []).reduce((rangeAcc, range) => {
-                        return rangeAcc + (range.count || 0) * (range.price || 0);
-                    }, 0);
+                    if (group.details && group.details.length > 0) {
+                        return groupAcc + group.details.reduce((detailAcc, detail) => {
+                            return detailAcc + (detail.count || 0) * (group.price || 0);
+                        }, 0);
+                    }
+                    return groupAcc;
                 }, 0);
                 return acc + groupTotal;
             }, 0);
@@ -215,16 +217,19 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
         setTotal(newTotal);
     }, [ticketSummary, setTotal]);
 
-    const calculatePayable = (item) => {
+    const calculatePayable = () => {
         return pwt ? total - pwt : total;
     };
 
     const calculateTotalQuantity = (items) => {
         return items.reduce((acc, item) => {
             const groupQuantity = (item.groups || []).reduce((groupAcc, group) => {
-                return groupAcc + (group.ranges || group.details || []).reduce((rangeAcc, range) => {
-                    return rangeAcc + (range.totalCount || 0);
-                }, 0);
+                if (group.details && group.details.length > 0) {
+                    return groupAcc + group.details.reduce((detailAcc, detail) => {
+                        return detailAcc + (detail.count || 0);
+                    }, 0);
+                }
+                return groupAcc;
             }, 0);
             return acc + groupQuantity;
         }, 0);
@@ -279,26 +284,26 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
                                     <tr>
                                         <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
                                         <td style={{ ...styles.tablegrpCell, ...styles.colDraw }}>
-                                            ({group.details[0].series || item.series})
+                                            ({group.details[0]?.series || item.series})
                                         </td>
                                         <td style={{ ...styles.tableCell, ...styles.colQty }}></td>
                                         <td style={{ ...styles.tableCell, ...styles.colRate }}></td>
                                         <td style={{ ...styles.tableCell, ...styles.colValue }}></td>
                                     </tr>
-                                    {(group.ranges || group.details || []).map((range, rangeIndex) => (
-                                        <tr key={rangeIndex}>
+                                    {(group.details || []).map((detail, detailIndex) => (
+                                        <tr key={detailIndex}>
                                             <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
                                             <td style={{ ...styles.tabletkCell, ...styles.colDraw }}>
-                                                {`${range.startNumber}-${range.endNumber}`}
+                                                {`${detail.startNumber}-${detail.endNumber}`}
                                             </td>
                                             <td style={{ ...styles.tableqtyCell, ...styles.colQty }}>
-                                                {(range.count || 0).toString().padStart(3, ' ')}
+                                                {(detail.count || 0).toString().padStart(3, ' ')}
                                             </td>
                                             <td style={{ ...styles.tableCell, ...styles.colRate }}>
                                                 {(group.price || 0).toFixed(2)}
                                             </td>
                                             <td style={{ ...styles.tableCell, ...styles.colValue }}>
-                                                {((range.count || 0) * (group.price || 0)).toFixed(2)}
+                                                {((detail.count || 0) * (group.price || 0)).toFixed(2)}
                                             </td>
                                         </tr>
                                     ))}
@@ -311,7 +316,7 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
                     </tr>
                     <tr>
                         <td style={{ ...styles.tableCell, ...styles.colNo }}></td>
-                        <td style={{ ...styles.tabletotalCell, ...styles.colTotal }}>Total</td>
+                        <td style={{ ...styles.tabletotalCell, ...styles.colDraw }}>Total</td>
                         <td style={{ ...styles.tableCell, ...styles.colQty }}>{calculateTotalQuantity(safeSummary)}</td>
                         <td style={{ ...styles.tableCell, ...styles.colRate }}></td>
                         <td style={{ ...styles.tabletotalCell, ...styles.colValue }}>₹{total.toFixed(2)}</td>
@@ -323,8 +328,8 @@ const PrintableContent = forwardRef(({ ticketSummary, currentDateTime, name, pwt
             </table>
             <div className='flex flex-row justify-between'>
                 <div>
-                    <p className='text-black text-[13px]'>PWT : ₹ <span className='text-black text-sm font-semibold'>{pwt}</span></p>
-                    <p className='text-black text-[13px]'>Total Payable Amount : ₹ <span className='text-black text-sm font-semibold'>{calculatePayable(safeSummary[0]).toFixed(2)}</span></p>
+                    <p className='text-black text-[13px]'>PWT : ₹ <span className='text-black text-sm font-semibold'>{pwt?.toFixed(2) || '0.00'}</span></p>
+                    <p className='text-black text-[13px]'>Total Payable Amount : ₹ <span className='text-black text-sm font-semibold'>{calculatePayable().toFixed(2)}</span></p>
                     <p className='text-black text-[13px] mt-1'>DC shall be claimed within 30 days</p>
                 </div>
                 <div className='mt-5'>

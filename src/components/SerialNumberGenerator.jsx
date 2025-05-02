@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {FaTrash} from 'react-icons/fa';
 import { ChevronDown } from 'lucide-react';
 import { useModal } from '../contexts/ModalContext'
+import { useNavigate } from 'react-router-dom';
 
 class Lottery {
     constructor(serial, number, ticketname, serialNumber, state, drawDate, identifier,date) {
@@ -80,12 +81,15 @@ const LotteryTicketGenerator = () => {
 
     const inputRefs = useRef([]);
     const { openModal} = useModal();
+
+    const navigate = useNavigate()
     
     function formatDate(date) {
         return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
     }
 
     const openBillingModal = () => {
+        // navigate('/billing')
         setIsBillingModalOpen(true);
     };
 
