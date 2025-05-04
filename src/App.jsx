@@ -5,7 +5,7 @@ import ModalManager from './components/common/ModalManager';
 import SerialNumberGenerator from './components/SerialNumberGenerator';
 import BillDetails from './components/BillDetails';
 import UpdateManager from './components/UpdateManager';
-import BillingModal from './components/BillingModal';
+import BillingPage from './components/BillingPage';
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ const AppContent = () => {
         <Route path="/" element={<SerialNumberGenerator />} />
         <Route path="/bills" element={<BillDetails />} />
         <Route path="/updater" element={<UpdateManager />} />
-        <Route path="/billing" element={<BillingModal/>}/>
+        <Route path="/billing" element={<BillingPage/>}/>
       </Routes>
       <ModalManager />
     </div>

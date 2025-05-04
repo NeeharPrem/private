@@ -22,7 +22,7 @@ const BillingModal = ({ isOpen, onClose }) => {
     const [expandedGroups, setExpandedGroups] = useState(new Set());
     const [modalIsOpen, setModalIsOpen] = useState(false);
     // const [ticketprice] = useState([33.36, 42.50, 33.10, 42.10])
-    const [ticketprice] = useState([42.70])
+    const [ticketprice] = useState([42.65])
     const [selectedPrice, setSelectedPrice] = useState(Number(ticketprice[0]));
     const [newprice, setNewprice] = useState(false)
     const [pwtPrice, setpwtPrice] = useState(0)
