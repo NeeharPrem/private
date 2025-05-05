@@ -76,7 +76,8 @@ const createTicketSummary = (selectedTickets, selectedPrice) => {
         if (!acc[seriesKey]) {
             acc[seriesKey] = {
                 ticketname: ticket.ticketname,
-                drawDate: formatDate(ticket.drawDate),
+                // drawDate: formatDate(ticket.drawDate),
+                drawDate: formatDate(new Date(ticket.drawDate)),
                 serialNum: ticket.serialNumber,
                 allSeries: new Set(),
                 ranges: {}

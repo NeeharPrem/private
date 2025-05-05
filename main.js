@@ -379,6 +379,21 @@ const customMenu = [
         ]
     },
     {
+        label: 'Master',
+        submenu: [
+            {
+                label: 'Price management',
+                click: () => {
+                    if (mainWindow && mainWindow.webContents) {
+                        mainWindow.webContents.send('price-management');
+                    } else {
+                        console.error('Main window or webContents not defined.');
+                    }
+                }
+            }
+        ]
+    },
+    {
         label: 'Bills',
         submenu: [
             {

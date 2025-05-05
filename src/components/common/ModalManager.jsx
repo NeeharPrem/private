@@ -2,6 +2,7 @@ import React from 'react';
 import { useModal } from '../../contexts/ModalContext';
 import ExportImportModal from '../DataExport';
 import CancelModal from './modal/CancelModal';
+import PriceManagement from '../PriceManangement';
 
 const ModalManager = () => {
     const { modalState } = useModal();
@@ -12,10 +13,13 @@ const ModalManager = () => {
                 return <ExportImportModal />;
             case 'CANCEL_BUTTON':
                 return <CancelModal />;
+            case 'PRICE_MANAGEMENT':
+                return <PriceManagement />; 
             default:
                 return null;
         }
     };
+    
 
     return renderModal(); 
 };

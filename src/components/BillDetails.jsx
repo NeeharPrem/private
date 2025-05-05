@@ -28,16 +28,29 @@ const BillDetails = () => {
         pwt: 0,
     });
 
-    const handlePrinting = (bill)=>{
-        setSelectedTickets(new Set(bill.tickets))
+    // const handlePrinting = (bill)=>{
+    //     setSelectedTickets(new Set(bill.tickets))
+    //     setSelectedBillDetails({
+    //         name: bill.name,
+    //         billNo: bill.billno,
+    //         price: bill.ticketPrice,
+    //         pwt: bill.pwt,
+    //     });
+    //     setModalIsOpen(true)
+    // }
+    const handlePrinting = (bill) => {
+        const ticketsSet = bill.tickets ? new Set(bill.tickets) : new Set();
+        
+        setSelectedTickets(ticketsSet);
         setSelectedBillDetails({
-            name: bill.name,
-            billNo: bill.billno,
-            price: bill.ticketPrice,
-            pwt: bill.pwt,
+            name: bill.name || '',
+            billNo: bill.billno || '',
+            price: bill.ticketPrice || 0,
+            pwt: bill.pwt || 0,
+            date: bill.date || new Date()
         });
-        setModalIsOpen(true)
-    }
+        setModalIsOpen(true);
+    };
 
     const handlePrintSuccess = async () => {
             setModalIsOpen(false)
@@ -79,17 +92,32 @@ const BillDetails = () => {
         return `${day}/${month}/${year}`;
     };
 
+    // const processBilldata = (bills) => {
+    //     const processed = bills.map(bill => ({
+    //         billno: bill.billno,
+    //         name: bill.name,
+    //         totalAmount: bill.totalAmount,
+    //         date: formatDate(bill.date),
+    //         tickets: Array.from(bill.tickets),
+    //         pwt: bill.pwt,
+    //         ticketPrice: bill?.ticketPrice,
+    //         type:bill?.type,
+    //         totalPayable: bill?.totalPayable
+    //     }));
+    //     setBillsData(processed);
+    // };
     const processBilldata = (bills) => {
         const processed = bills.map(bill => ({
-            billno: bill.billno,
-            name: bill.name,
-            totalAmount: bill.totalAmount,
-            date: formatDate(bill.date),
-            tickets: Array.from(bill.tickets),
-            pwt: bill.pwt,
-            ticketPrice: bill?.ticketPrice,
-            type:bill?.type,
-            totalPayable: bill?.totalPayable
+            billno: bill.billno || '',
+            name: bill.name || '',
+            totalAmount: bill.totalAmount || 0,
+            date: bill.date ? formatDate(bill.date) : formatDate(new Date()),
+            tickets: Array.isArray(bill.tickets) ? bill.tickets : Array.from(bill.tickets || []),
+            pwt: bill.pwt || 0,
+            ticketPrice: bill.ticketPrice || 0,
+            type: bill.type || 'Original',
+            totalPayable: bill.totalPayable || (bill.totalAmount - (bill.pwt || 0)),
+            id: bill.id || Date.now() // Add a unique ID if missing
         }));
         setBillsData(processed);
     };

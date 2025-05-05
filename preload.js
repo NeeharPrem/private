@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onOpenBillsPage: (callback) => ipcRenderer.on('open-bills-page', callback),
   onOpenUpdaterPage: (callback) => ipcRenderer.on('open-updater-page', callback),
   onOpenExportModal: (callback) => ipcRenderer.on('open-export-modal', callback),
+  onOpenPricePage: (callback) => ipcRenderer.on('price-management', callback),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
   onDataUpdate: (callback) => {
     const channel = 'data-update';

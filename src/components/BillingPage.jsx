@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { generateSummary } from './../utils/groupTickets';
 import { formatDate } from '../utils/fortmatDate';
 import SelectedTickets from './SelectedTickets';
+import { useNavigate } from 'react-router-dom';
 
 const BillingPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -36,6 +37,7 @@ const BillingPage = () => {
     const [showTicket, setShowTickets] = useState(new Date());
     const currentDateTime = new Date();
     const ticketsToShow = 50;
+    const navigate = useNavigate()
 
     useEffect(() => {
         setSelectedDrawDate(formatDate(showTicket));
@@ -428,7 +430,7 @@ const BillingPage = () => {
     return (
         <div className="flex flex-col h-screen bg-gray-100">
             {/* Header */}
-            <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+            {/* <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
                 <h1 className="text-xl font-bold">Lottery Billing System</h1>
                 <div className="flex space-x-2">
                     <button className="p-2 hover:bg-blue-700 rounded">
@@ -438,7 +440,7 @@ const BillingPage = () => {
                         <FaTimes />
                     </button>
                 </div>
-            </div>
+            </div> */}
 
             {/* Main Content */}
             <div className="flex flex-1 overflow-hidden">
@@ -548,6 +550,7 @@ const BillingPage = () => {
 
                     <div className="mt-auto flex space-x-2">
                         <button 
+                        onClick={()=>navigate('/')}
                             className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
                         >
                             Close
@@ -744,7 +747,7 @@ const BillingPage = () => {
                             onRemove={handleRemoveSelectedTickets}
                         />
                     </div>
-                    <div className="mt-4 p-4 bg-gray-100 rounded">
+                    {/* <div className="mt-4 p-4 bg-gray-100 rounded">
                         <div className="flex justify-between mb-2">
                             <span className="font-semibold">Total Tickets:</span>
                             <span>{(newSelected1.size > 0 ? newSelected1.size : selectedTickets.size)}</span>
@@ -761,7 +764,7 @@ const BillingPage = () => {
                             <span>Total Payable:</span>
                             <span>₹{((newSelected1.size > 0 ? newSelected1.size : selectedTickets.size) * selectedPrice - pwtPrice).toFixed(2)}</span>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

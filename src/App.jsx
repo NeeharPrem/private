@@ -6,6 +6,7 @@ import SerialNumberGenerator from './components/SerialNumberGenerator';
 import BillDetails from './components/BillDetails';
 import UpdateManager from './components/UpdateManager';
 import BillingPage from './components/BillingPage';
+import BillingModal from './components/BillingModal';
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -17,12 +18,16 @@ const AppContent = () => {
     const setupElectronListeners = () => {
       const routeHandlers = [
         { event: 'onOpenBillsPage', path: '/bills', listenerName: 'open-bills-page' },
-        { event: 'onOpenUpdaterPage', path: '/updater', listenerName: 'open-updater-page' }
+        { event: 'onOpenUpdaterPage', path: '/updater', listenerName: 'open-updater-page' },
       ];
+
 
       if (window.electronAPI.onOpenExportModal) {
         window.electronAPI.onOpenExportModal(() => {
-          openModal('EXPORT_IMPORT');
+
+          const shouldOpenPriceManagement = false;
+          const modalToOpen = shouldOpenPriceManagement ? 'PRICE_MANAGEMENT' : 'EXPORT_IMPORT';
+          openModal(modalToOpen);
         });
       }
 
@@ -48,6 +53,7 @@ const AppContent = () => {
         cleanup.forEach(cleanupFn => cleanupFn());
         if (window.electronAPI.removeAllListeners) {
           window.electronAPI.removeAllListeners('open-export-modal');
+          window.electronAPI.removeAllListeners('price-management');
         }
       };
     };
@@ -61,7 +67,7 @@ const AppContent = () => {
         <Route path="/" element={<SerialNumberGenerator />} />
         <Route path="/bills" element={<BillDetails />} />
         <Route path="/updater" element={<UpdateManager />} />
-        <Route path="/billing" element={<BillingPage/>}/>
+        <Route path="/billing" element={<BillingModal />} />
       </Routes>
       <ModalManager />
     </div>
@@ -69,9 +75,7 @@ const AppContent = () => {
 };
 
 function App() {
-  return (
-      <AppContent />
-  );
+  return <AppContent />;
 }
 
 export default App;

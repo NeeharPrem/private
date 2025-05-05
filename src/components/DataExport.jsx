@@ -48,7 +48,7 @@ const ExportImportModal = () => {
             setLoading(false);
         }
     };
-
+    console.log(openModal)
     const handleExportTickets = async () => {
         setLoading(true);
         setStatus({ success: false, error: false, message: '', type: '' });

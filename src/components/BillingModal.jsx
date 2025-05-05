@@ -62,6 +62,7 @@ const BillingModal = ({ isOpen, onClose }) => {
     }, [searchQuery, allTickets, selectedDrawDate, showTicket]);
 
     const handlePrintSuccess = async () => {
+        console.log("first")
         if (tempBillNo !== null) {
             await saveBillNumber(tempBillNo);
             setBillno(tempBillNo);
@@ -191,42 +192,110 @@ const BillingModal = ({ isOpen, onClose }) => {
         }
     };
 
+    // const calculateTotal = (items) => {
+    //     return items.reduce((acc, item) => {
+    //         return acc + item.groups.reduce((groupAcc, group) => {
+    //             return groupAcc + group.ranges.reduce((rangeAcc, range) => {
+    //                 return rangeAcc + range.count * range.price;
+    //             }, 0);
+    //         }, 0);
+    //     }, 0);
+    // };
     const calculateTotal = (items) => {
+        if (!items || !Array.isArray(items)) return 0;
+        
         return items.reduce((acc, item) => {
-            return acc + item.groups.reduce((groupAcc, group) => {
-                return groupAcc + group.ranges.reduce((rangeAcc, range) => {
-                    return rangeAcc + range.count * range.price;
-                }, 0);
-            }, 0);
+          const groupTotal = (item.groups || []).reduce((groupAcc, group) => {
+            if (group.details && group.details.length > 0) {
+              return groupAcc + group.details.reduce((detailAcc, detail) => {
+                return detailAcc + (detail.count || 0) * (group.price || 0);
+              }, 0);
+            }
+            return groupAcc;
+          }, 0);
+          return acc + groupTotal;
         }, 0);
-    };
+      };
 
+    // const handleBillsave = async (ticketData, billNo, buyerName, pwtPrice, currentDateTime) => {
+    //     console.log(ticketData,billNo,buyerName,pwtPrice,currentDateTime)
+    //     try {
+    //         if (!finalSortedSummary || !selectedPrice) {
+    //             throw new Error('Required data is missing: finalSortedSummary or selectedPrice');
+    //         }
+
+    //         const totalOut = calculateTotal(finalSortedSummary);
+    //         const totalPay = pwtPrice ? totalOut - pwtPrice : totalOut;
+
+    //         const saveData = {
+    //             type: 'Original',
+    //             billno: billNo,
+    //             name: buyerName,
+    //             date: currentDateTime,
+    //             tickets: ticketData,
+    //             pwt: pwtPrice,
+    //             totalAmount: totalOut.toFixed(2),
+    //             ticketPrice: selectedPrice,
+    //             totalPayable: totalPay.toFixed(2),
+    //             claimStatus: false
+    //         };
+    //         await saveBills(saveData);
+
+    //         console.log('Bill data saved successfully');
+    //     } catch (error) {
+    //         console.error('Error saving the Bill data:', error);
+    //     }
+    // };
     const handleBillsave = async (ticketData, billNo, buyerName, pwtPrice, currentDateTime) => {
+        console.log('Saving:', { 
+            ticketData: Array.from(ticketData), 
+            billNo, 
+            buyerName, 
+            pwtPrice, 
+            currentDateTime 
+        });
+    
         try {
             if (!finalSortedSummary || !selectedPrice) {
                 throw new Error('Required data is missing: finalSortedSummary or selectedPrice');
             }
-
+    
             const totalOut = calculateTotal(finalSortedSummary);
             const totalPay = pwtPrice ? totalOut - pwtPrice : totalOut;
-
+    
             const saveData = {
                 type: 'Original',
                 billno: billNo,
                 name: buyerName,
-                date: currentDateTime,
-                tickets: ticketData,
+                date: currentDateTime.toISOString(),
+                tickets: Array.from(ticketData).map(ticket => ({
+                    ...ticket,
+                    date: ticket.date?.toISOString(),
+                    drawDate: ticket.drawDate?.toISOString()
+                })),
                 pwt: pwtPrice,
                 totalAmount: totalOut.toFixed(2),
                 ticketPrice: selectedPrice,
                 totalPayable: totalPay.toFixed(2),
                 claimStatus: false
             };
-            await saveBills(saveData);
-
-            console.log('Bill data saved successfully');
+    
+            console.log('Processed save data:', saveData);
+            const result = await saveBills(saveData);
+            console.log('Save result:', result);
+    
         } catch (error) {
-            console.error('Error saving the Bill data:', error);
+            console.error('Full error saving bill:', {
+                error: error.message,
+                stack: error.stack,
+                data: {
+                    billNo,
+                    buyerName,
+                    pwtPrice,
+                    currentDateTime
+                }
+            });
+            throw error; 
         }
     };
 
